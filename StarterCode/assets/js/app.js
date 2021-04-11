@@ -25,14 +25,14 @@ var svg = d3
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
   //Load data drom data.csv
-  d3.csv("data.csv").then(function(data){
+  d3.csv("/StarterCode/assets/data/data.csv").then(function(data){
       //Create Scale functions
       var xLinearScale = d3.scaleLinear()
-      .domain([0, d3.max(data, d=>d.proverty)])
+      .domain([d3.min(data, d=>d.poverty), d3.max(data, d=>d.poverty)])
       .range([0,width])
 
       var yLinearScale = d3.scaleLinear()
-      .domain([0, d3.max(data, d=>d.healthcare)])
+      .domain([d3.min(data, d=>d.healthcare), d3.max(data, d=>d.healthcare)])
       .range([height, 0])
 
       //Create axis functions
@@ -44,7 +44,7 @@ var svg = d3
         .attr("transform",`translate(0, ${height})`)
         .call(bottomAxis)
 
-      chartGroup.append('"g')
+      chartGroup.append('g')
         .call(leftAxis)
 
       //Create circles
@@ -52,14 +52,27 @@ var svg = d3
         .data(data)
         .enter()
         .append("circle")
-        .attr("cx", d=> xLinearScale.proverty)
-        .attr("cy", d=> yLinearScale.healthcare)
+        .attr("cx", d=> {
+          //return xLinearScale(d.poverty)
+          return d.poverty
+        })
+        .attr("cy", d=> {
+          //console.log(yLinearScale(d.healthcare))
+          return d.healthcare
+        })
         .attr("r", 10)
         .attr("fill", "blue")
         .attr("opacity", ".5")
-
-        //How to put circle inside of the circles?
       
+        .append('text')
+        .text(d => d.abbr)
+
+        //How to put state abbr inside of the circles?
+      d3.selectAll('.stateText').each(function() {
+        d3.select(this).attr('dx', d => {
+          return xLinearScale(d.poverty)
+        })
+      })
      
         // Create axes labels
       chartGroup.append("text")
@@ -68,17 +81,12 @@ var svg = d3
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .attr("class", "axisText")
-        .text("In Proverty (%)");
+        .text("Lacks Healthcare (%)");
 
       chartGroup.append("text")
        .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
         .attr("class", "axisText")
-        .text("Lacks Healthcare (%)");
+        .text("In Poverty (%)");
       }).catch(function(error) {
         console.log(error);
-
-
-
-
-
   })
