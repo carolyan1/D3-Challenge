@@ -24,16 +24,23 @@ var svg = d3
   var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+var gdata
+
   //Load data drom data.csv
   d3.csv("/StarterCode/assets/data/data.csv").then(function(data){
+      gdata = data
       //Create Scale functions
       var xLinearScale = d3.scaleLinear()
-      .domain([d3.min(data, d=>d.poverty), d3.max(data, d=>d.poverty)])
+      .domain([d3.min(data, d=>+d.poverty), d3.max(data, d=>+d.poverty)])
       .range([0,width])
+      console.log(d3.min(data, d=>+d.poverty),xLinearScale(d3.min(data, d=>+d.poverty)))
+      console.log(d3.max(data, d=>+d.poverty),xLinearScale(d3.max(data, d=>+d.poverty)))
 
       var yLinearScale = d3.scaleLinear()
-      .domain([d3.min(data, d=>d.healthcare), d3.max(data, d=>d.healthcare)])
+      .domain([0, d3.max(data, d=>+d.healthcare)])
       .range([height, 0])
+      console.log(d3.min(data, d=>+d.healthcare),yLinearScale(d3.min(data, d=>+d.healthcare)))
+      console.log(d3.max(data, d=>+d.healthcare),yLinearScale(d3.max(data, d=>+d.healthcare)))
 
       //Create axis functions
       var bottomAxis = d3.axisBottom(xLinearScale)
@@ -53,24 +60,43 @@ var svg = d3
         .enter()
         .append("circle")
         .attr("cx", d=> {
-          //return xLinearScale(d.poverty)
-          return d.poverty
+          console.log(+d.poverty, xLinearScale(+d.poverty))
+          return xLinearScale(+d.poverty)
+          //return d.poverty
         })
         .attr("cy", d=> {
-          //console.log(yLinearScale(d.healthcare))
-          return d.healthcare
+          return yLinearScale(+d.healthcare)
+          //return d.healthcare
         })
         .attr("r", 10)
         .attr("fill", "blue")
         .attr("opacity", ".5")
       
-        .append('text')
+        // .append('text')
+        // .text(d => d.abbr)
+        // .x
+
+        //create text
+        var textgroup = chartGroup.selectAll("abbr")
+        .data(data)
+        .enter()
+        .append("text")
         .text(d => d.abbr)
+        .attr("x", d=> {
+          console.log(+d.poverty, xLinearScale(+d.poverty))
+          return (xLinearScale(+d.poverty)-8)
+          //return d.poverty
+        })
+        .attr("y", d=> {
+          return yLinearScale(+d.healthcare)+5
+        })
+  
+      
 
         //How to put state abbr inside of the circles?
       d3.selectAll('.stateText').each(function() {
         d3.select(this).attr('dx', d => {
-          return xLinearScale(d.poverty)
+          return xLinearScale(+d.poverty)
         })
       })
      
